@@ -13,12 +13,12 @@ knitr::opts_chunk$set(echo = TRUE)
 
 The R notebook aims to reconstruct the individual patient data from published Kaplan-Meier curves using the R package `IPDfromKM`. This notebook accompany the blog [article](https://davidzhao1015.github.io/blog/2026/IPD-from-KM-R/).
 
-The codes was reproduced from the official manual by authors of `IPDfromKM`, Na Liu et al, with enhanced documentation for better clarity to audience. 
+The analytical workflow follows instructions of `IPDfromKM`, authored by Na Liu et al. The core algorim to reconstruct invidual patient data from the published KM curves was based on Guyot's method, with enhanced modifications. 
 
 
 ## Step-by-step implementation
 
-### Prepare input data
+### Load the library
 
 ```{r}
 
@@ -26,12 +26,126 @@ library("IPDfromKM")
 
 ```
 
-## Including Plots
+### Prepare input data
 
-You can also embed plots, for example:
+```{r input, echo=FALSE}
 
-```{r pressure, echo=FALSE}
-plot(pressure)
+radio <- Radiationdata$radio
+radioplus <- Radiationdata$radioplus
+trisk <- Radiationdata$trisk
+nrisk_radio <- Radiationdata$nrisk.radio
+nrisk_radioplus <- Radiationdata$nrisk.radioplus
+
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+### Plot survival curves for two arms 
+
+```{r visual validation}
+
+
+plot(radio, 
+     xlab="Time (month)", ylab="Survival proportion (%)",
+     type="l",
+     lty=2,
+     col="cyan4",
+     xlim=c(1, 70),
+     ylim=c(0,100),
+     main="Curves extracted by ScanIt software")
+
+lines(radioplus, 
+      type="l",
+      col="red4",
+      lty=1)
+legend("topright",
+       c("Radiotherapy", "Radiotherapy plus cetuximab"),
+       col=c("cyan4", "red4"),
+       lty = c(2,1),
+       text.col =c("cyan4", "red4") ,
+       bty = "n")
+text(40, 80, "Reported Hazard Ratio with 95% CI:")
+text(40, 75, "0.68 (0.52, 0.89)")
+
+
+```
+
+
+### Reconstruct IPD from KM curves 
+
+#### Control arm
+
+```{r}
+
+pre_radio <- preprocess(dat = radio, 
+                        trisk = trisk,
+                        nrisk = nrisk_radio,
+                        maxy = 100)
+est_radio <- getIPD(prep = pre_radio, armID = 0, tot.events = NULL)
+
+```
+
+
+#### Treatment arm
+
+```{r}
+
+
+pre_radio_plus <- preprocess(dat = radioplus, 
+                             trisk = trisk,
+                             nrisk = nrisk_radioplus,
+                             maxy = 100)
+est_radio_plus <- getIPD(prep = pre_radio_plus, armID = 1, tot.events = NULL)
+
+
+```
+
+
+### Graphic and statistical validation
+
+#### Control arm
+
+```{r}
+
+plot(est_radio)
+
+```
+
+
+```{r}
+
+summary(est_radio)
+
+```
+
+
+#### Treatment arm
+
+```{r}
+
+plot(est_radio_plus)
+
+
+```
+
+
+```{r}
+
+
+summary(est_radio_plus)
+
+
+```
+
+### Output
+
+```{r}
+
+surv2 <-survreport(ipd1 = est_radio$IPD,
+                   ipd2 = est_radio_plus$IPD,
+                   arms = 2,
+                   interval = 8,
+                   s = c(0.75, 0.5, 0.25),
+                   showplots = TRUE)
+
+```
+
