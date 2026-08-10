@@ -1,48 +1,91 @@
 ---
-title: "Reconstruct IPD from KM Example"
+title: "Reconstructing Individual Patient Data from Published Kaplan–Meier Curves, R Notebook"
 author: "Xin (David) Zhao"
-date: "2026-07-29"
-output: html_document
+date: "2026-08-10"
+output: 
+    html_document:
+        toc: FALSE
+        code_folding: "show"
+        code_download: TRUE
+        theme:
+            bg: "#FFFFFF"
+            fg: "#24292F"
+            base_font:
+                google: "Inter"
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+```{r setup, include = FALSE}
+
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE, fig.align='center')
+
 ```
 
-## R Markdown
+## 1. Introduction
 
-The R notebook aims to reconstruct the individual patient data from published Kaplan-Meier curves using the R package `IPDfromKM`. This notebook accompany the blog [article](https://davidzhao1015.github.io/blog/2026/IPD-from-KM-R/).
+The programmed analytical workflow closely follows instructions of the R
+package `IPDfromKM`, invented by Na Liu et al, which is powered by the
+robust Guyot's algorithm.
 
-The analytical workflow follows instructions of `IPDfromKM`, authored by Na Liu et al. The core algorim to reconstruct invidual patient data from the published KM curves was based on Guyot's method, with enhanced modifications. 
+The R notebook contains explaining documentation along with scrips. For
+more detailed interpretations and supportive information, view the blog
+[article](https://davidzhao1015.github.io/blog/2026/IPD-from-KM-R/)
+accompanying this notebook.
+
+The notebook was built with R `r getRversion()`.
 
 
-## Step-by-step implementation
+## 2. Step-by-step R implementation
 
-### Load the library
+The analytic steps include, 1. Digitize KM curves 2. Validate digitized
+data 3. Preprocess coordinates 4. Reconstruct IPD 5. Validate
+reconstructed IPD 6. Visualize outcomes
 
-```{r}
+The first step was implemented by the external software, while all other
+steps are streamlined in R package `IPDfromKM`.
+
+### 2.1 Load the library
+
+The version of the IPDfromKM used in the notebook, `r packageVersion("IPDfromKM")`.
+
+```{r library}
 
 library("IPDfromKM")
 
 ```
 
-### Prepare input data
+### 2.2 Prepare input data
 
-```{r input, echo=FALSE}
+The input data is digitized time-to-event data, and can be accessible
+from the package. It is derived from a published clinical study on
+effect of a cancer treatment (radiotherapy plus cetuximab) on patients
+with skin cancer compared with the cotnrol (radiotherapy alone). The
+follow-up dufration is about 60 weeks.
 
+The event of interest is tummor is prevented from returning or
+progressing at the original region (logcoregional control).
+
+The input object contains three elements, - time-specific event
+proportions for both arms - number of patients at risk for both arms -
+time at risk
+
+```{r input}
+
+# Time-specific event proportions for both arms
 radio <- Radiationdata$radio
 radioplus <- Radiationdata$radioplus
+
+# Number of patients at risk for both arms
 trisk <- Radiationdata$trisk
 nrisk_radio <- Radiationdata$nrisk.radio
+
+# Time at risk 
 nrisk_radioplus <- Radiationdata$nrisk.radioplus
 
 ```
 
-
-### Plot survival curves for two arms 
+### 2.3 Validate digitized data
 
 ```{r visual validation}
-
 
 plot(radio, 
      xlab="Time (month)", ylab="Survival proportion (%)",
@@ -69,12 +112,20 @@ text(40, 75, "0.68 (0.52, 0.89)")
 
 ```
 
+### 2.4 Preprocess coordinates & Reconstruct IPD {.tabset}
 
-### Reconstruct IPD from KM curves 
+Convert the extracted input data into the format required for IPD
+reconstruction using the preprocess() function, which aligns the
+digitized coordinates with reported numbers at risk so that Guyot’s
+algorithm can correctly estimate censoring patterns.
+
+Apply Guyot’s algorithm to reconstruct IPD, the core step in the
+procedure to estimate events and censoring based on predefined
+assumptions.
 
 #### Control arm
 
-```{r}
+```{r prep for control}
 
 pre_radio <- preprocess(dat = radio, 
                         trisk = trisk,
@@ -84,10 +135,9 @@ est_radio <- getIPD(prep = pre_radio, armID = 0, tot.events = NULL)
 
 ```
 
-
 #### Treatment arm
 
-```{r}
+```{r prep for treatment}
 
 
 pre_radio_plus <- preprocess(dat = radioplus, 
@@ -99,8 +149,17 @@ est_radio_plus <- getIPD(prep = pre_radio_plus, armID = 1, tot.events = NULL)
 
 ```
 
+### 2.5 Validate reconstructed IPD {.tabset}
 
-### Graphic and statistical validation
+The summary presents a quantitative comparison between the reconstructed
+and digitized KM curves, based on root-mean-square error (RMSE), mean
+absolute error (MAE), and maximum absolute error. Together, these
+metrics indicate excellent agreement between the reconstructed and
+original survival curves.
+
+The IPDfromKM package provides graphical diagnostics to assess how well
+the reconstructed IPD reproduces the published KM curves and the
+digitized source data.
 
 #### Control arm
 
@@ -110,13 +169,11 @@ plot(est_radio)
 
 ```
 
-
 ```{r}
 
 summary(est_radio)
 
 ```
-
 
 #### Treatment arm
 
@@ -127,7 +184,6 @@ plot(est_radio_plus)
 
 ```
 
-
 ```{r}
 
 
@@ -136,7 +192,11 @@ summary(est_radio_plus)
 
 ```
 
-### Output
+### 2.6 Visualize outcomes
+
+Once the reconstructed IPD has been validated, it can be used to answer
+several clinically and statistically important questions that are often
+not directly reported in the original publication.
 
 ```{r}
 
@@ -148,4 +208,11 @@ surv2 <-survreport(ipd1 = est_radio$IPD,
                    showplots = TRUE)
 
 ```
+
+
+### Author Bio
+
+[Xin (David) Zhao, PhD](https://davidzhao1015.github.io/), integrates epidemiology, evidence synthesis, quantitative modeling, and health economics to develop transparent, reproducible analytics that support healthcare and biotech decision-making.
+
+
 
