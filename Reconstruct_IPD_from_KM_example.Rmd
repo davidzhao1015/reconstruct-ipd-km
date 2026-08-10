@@ -20,6 +20,7 @@ knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE, fig.align='
 
 ```
 
+
 ## 1. Introduction
 
 The programmed analytic workflow closely follows the instructions of the R
