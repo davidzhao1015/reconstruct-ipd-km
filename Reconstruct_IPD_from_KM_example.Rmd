@@ -24,8 +24,8 @@ knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE, fig.align='
 ## 1. Introduction
 
 The programmed analytic workflow closely follows the instructions of the R
-package `IPDfromKM`, invented by Na Liu et al, which is powered by the
-robust Guyot's algorithm.
+package `IPDfromKM`, invented by [Na Liu et al](https://cran.r-project.org/web/packages/IPDfromKM/refman/IPDfromKM.html), which is powered by the
+robust [Guyot's algorithm](https://link.springer.com/article/10.1186/1471-2288-12-9).
 
 The R notebook contains explanatory documentation along with scripts. For
 more detailed interpretations and supportive information, view the blog
