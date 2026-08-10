@@ -1,0 +1,37 @@
+---
+title: "Reconstruct IPD from KM Example"
+author: "Xin (David) Zhao"
+date: "2026-07-29"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+The R notebook aims to reconstruct the individual patient data from published Kaplan-Meier curves using the R package `IPDfromKM`. This notebook accompany the blog [article](https://davidzhao1015.github.io/blog/2026/IPD-from-KM-R/).
+
+The codes was reproduced from the official manual by authors of `IPDfromKM`, Na Liu et al, with enhanced documentation for better clarity to audience. 
+
+
+## Step-by-step implementation
+
+### Prepare input data
+
+```{r}
+
+library("IPDfromKM")
+
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
