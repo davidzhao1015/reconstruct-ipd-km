@@ -5,7 +5,7 @@ date: "2026-08-10"
 output: 
     html_document:
         toc: FALSE
-        code_folding: "show"
+        code_folding: "none"
         code_download: TRUE
         theme:
             bg: "#FFFFFF"
@@ -22,11 +22,11 @@ knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE, fig.align='
 
 ## 1. Introduction
 
-The programmed analytical workflow closely follows instructions of the R
+The programmed analytic workflow closely follows the instructions of the R
 package `IPDfromKM`, invented by Na Liu et al, which is powered by the
 robust Guyot's algorithm.
 
-The R notebook contains explaining documentation along with scrips. For
+The R notebook contains explanatory documentation along with scripts. For
 more detailed interpretations and supportive information, view the blog
 [article](https://davidzhao1015.github.io/blog/2026/IPD-from-KM-R/)
 accompanying this notebook.
@@ -36,16 +36,21 @@ The notebook was built with R `r getRversion()`.
 
 ## 2. Step-by-step R implementation
 
-The analytic steps include, 1. Digitize KM curves 2. Validate digitized
-data 3. Preprocess coordinates 4. Reconstruct IPD 5. Validate
-reconstructed IPD 6. Visualize outcomes
+The analytic steps include, 
 
-The first step was implemented by the external software, while all other
-steps are streamlined in R package `IPDfromKM`.
+1. Digitize Kaplan–Meier (KM) curves
+2. Validate digitized data
+3. Preprocess coordinate data
+4. Reconstruct individual patient data (IPD)
+5. Validate reconstructed IPD
+6. Visualize reconstruction outcomes
+
+The first step to digitize KM curves was implemented by the external software, while all other
+steps are streamlined in the R package `IPDfromKM`.
 
 ### 2.1 Load the library
 
-The version of the IPDfromKM used in the notebook, `r packageVersion("IPDfromKM")`.
+The version of the `IPDfromKM` used in the notebook: `r packageVersion("IPDfromKM")`.
 
 ```{r library}
 
@@ -55,18 +60,15 @@ library("IPDfromKM")
 
 ### 2.2 Prepare input data
 
-The input data is digitized time-to-event data, and can be accessible
-from the package. It is derived from a published clinical study on
-effect of a cancer treatment (radiotherapy plus cetuximab) on patients
-with skin cancer compared with the cotnrol (radiotherapy alone). The
-follow-up dufration is about 60 weeks.
+The input data consists of digitized time-to-event information available from the package. It is based on a published clinical study examining the effects of radiotherapy plus cetuximab versus radiotherapy alone in patients with skin cancer. The follow-up period is approximately 60 weeks.
 
-The event of interest is tummor is prevented from returning or
-progressing at the original region (logcoregional control).
+The event of interest is locoregional control, defined as the absence of tumor recurrence or progression at the original site.
 
-The input object contains three elements, - time-specific event
-proportions for both arms - number of patients at risk for both arms -
-time at risk
+The input object includes three components:
+
+* Time-specific event proportions for each treatment arm
+* Number of patients at risk in each arm
+* Time at risk
 
 ```{r input}
 
@@ -115,7 +117,7 @@ text(40, 75, "0.68 (0.52, 0.89)")
 ### 2.4 Preprocess coordinates & Reconstruct IPD {.tabset}
 
 Convert the extracted input data into the format required for IPD
-reconstruction using the preprocess() function, which aligns the
+reconstruction using the `preprocess()` function, which aligns the
 digitized coordinates with reported numbers at risk so that Guyot’s
 algorithm can correctly estimate censoring patterns.
 
@@ -151,15 +153,16 @@ est_radio_plus <- getIPD(prep = pre_radio_plus, armID = 1, tot.events = NULL)
 
 ### 2.5 Validate reconstructed IPD {.tabset}
 
-The summary presents a quantitative comparison between the reconstructed
-and digitized KM curves, based on root-mean-square error (RMSE), mean
-absolute error (MAE), and maximum absolute error. Together, these
-metrics indicate excellent agreement between the reconstructed and
-original survival curves.
-
-The IPDfromKM package provides graphical diagnostics to assess how well
+The `IPDfromKM` package provides graphical diagnostics to assess how well
 the reconstructed IPD reproduces the published KM curves and the
 digitized source data.
+
+The summary presents a quantitative comparison between the reconstructed
+and digitized KM curves, based on root-mean-square error (RMSE), mean
+absolute error (MAE), and maximum absolute error. 
+
+Together, these metrics indicate excellent agreement between the reconstructed and
+original survival curves.
 
 #### Control arm
 
@@ -194,9 +197,9 @@ summary(est_radio_plus)
 
 ### 2.6 Visualize outcomes
 
-Once the reconstructed IPD has been validated, it can be used to answer
-several clinically and statistically important questions that are often
-not directly reported in the original publication.
+Once validated, the reconstructed IPD enables analysis of clinically and statistically important questions that may not be addressed in the original publication. For instance, health technology assessment (HTA) submissions often require extrapolation of overall survival beyond the trial period, but only published KM curves are available. Reconstructed IPD allows fitting alternative parametric models for more robust extrapolation.
+
+All these analyses can be performed using a single function: `survreport()`.
 
 ```{r}
 
@@ -210,7 +213,7 @@ surv2 <-survreport(ipd1 = est_radio$IPD,
 ```
 
 
-### Author Bio
+#### Author Bio
 
 [Xin (David) Zhao, PhD](https://davidzhao1015.github.io/), integrates epidemiology, evidence synthesis, quantitative modeling, and health economics to develop transparent, reproducible analytics that support healthcare and biotech decision-making.
 
